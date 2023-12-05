@@ -13,8 +13,8 @@ def jqrs(ecg, HRVparams):
     debug = HRVparams['PeakDetect']['debug']
     ecg = np.squeeze(ecg)
     NB_SAMP = len(ecg)
-    INT_NB_COEFF = round(7 * fs / 256)  # Assuming you want to keep the same definition as in the MATLAB code
-    MED_SMOOTH_NB_COEFF = round(fs / 100)  # Assuming you want to keep the same definition as in the MATLAB code
+    INT_NB_COEFF = round(7 * fs / 256)
+    MED_SMOOTH_NB_COEFF = round(fs / 100)
     MAX_FORCE = None
     SEARCH_BACK = 1
     tm = np.arange(1/fs, (NB_SAMP/fs) + 1/fs, 1/fs)
