@@ -16,10 +16,14 @@ def initialize_HRVparams():
         },
         'Fs': 1000,
         'PeakDetect': {
-            'windows': 10,
+            'REF_PERIOD': 0.250,
             'THRES': 0.6,
-            'ecgType': 'ECG'
-        }
+            'fid_vec': [],
+            'SIGN_FORCE': [],
+            'debug': True,
+            'windows': 15,
+            'ecgType': 'MECG'
+        },
     }
 
 # Function to read ECG data from a .dat file

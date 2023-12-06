@@ -33,7 +33,7 @@ def jqrs(ecg, HRVparams):
     #b1 = resample(b1, int(250 / fs * len(b1)))
     resampled_b1 = interp1d(np.linspace(0, 1, len(b1)), b1, kind='linear')(np.linspace(0, 1, int(250 / fs * len(b1))))
     b1 = resampled_b1
-    bpfecg = filtfilt(b1, 1, ecg)
+    bpfecg = filtfilt(b1, 1, ecg) * fs
 
 
     MIN_AMP = 0.1  # Define MIN_AMP here
@@ -47,7 +47,7 @@ def jqrs(ecg, HRVparams):
         delay = int(np.ceil(INT_NB_COEFF / 2))
         mdfint = np.roll(mdfint, -delay)
 
-        if fid_vec:
+        if len(fid_vec) == 0:
             mdfintFidel = mdfint
         else:
             mdfintFidel = np.zeros_like(mdfint)
@@ -88,6 +88,7 @@ def jqrs(ecg, HRVparams):
             for j in range(nb_s):
                 loc[j] = np.argmax(np.abs(bpfecg[left[j]:right[j]]))
                 loc[j] = loc[j] - 1 + left[j]
+            loc = loc.astype(int)
             sign = np.mean(ecg[loc])
 
         compt = 1
@@ -95,25 +96,29 @@ def jqrs(ecg, HRVparams):
         maxval = np.zeros(NB_PEAKS)
         maxloc = np.zeros(NB_PEAKS)
         for i in range(NB_PEAKS):
+            segment = ecg[left[i]:right[i]]
             if sign > 0:
-                maxval[compt - 1], maxloc[compt - 1] = np.max(ecg[left[i]:right[i]])
+                maxval[compt - 1] = np.max(segment)
+                maxloc[compt - 1] = np.argmax(segment) + left[i]
             else:
-                maxval[compt - 1], maxloc[compt - 1] = np.min(ecg[left[i]:right[i]])
-            maxloc[compt - 1] = maxloc[compt - 1] - 1 + left[i]
+                maxval[compt - 1] = np.min(segment)
+                maxloc[compt - 1] = np.argmin(segment) + left[i]
 
             if compt > 1:
-                if maxloc[compt - 1] - maxloc[compt - 2] < fs * REF_PERIOD and abs(maxval[compt - 1]) < abs(
-                        maxval[compt - 2]):
+                if (maxloc[compt - 1] - maxloc[compt - 2] < fs * REF_PERIOD and 
+                    abs(maxval[compt - 1]) < abs(maxval[compt - 2])):
                     compt -= 1
-                elif maxloc[compt - 1] - maxloc[compt - 2] < fs * REF_PERIOD and abs(maxval[compt - 1]) >= abs(
-                        maxval[compt - 2]):
+                elif (maxloc[compt - 1] - maxloc[compt - 2] < fs * REF_PERIOD and 
+                    abs(maxval[compt - 1]) >= abs(maxval[compt - 2])):
                     compt -= 1
                 else:
                     compt += 1
             else:
                 compt += 1
 
+
         qrs_pos = maxloc
+        maxloc = maxloc.astype(int)
         R_t = tm[maxloc]
         R_amp = maxval
         hrv = 60 / np.diff(R_t)

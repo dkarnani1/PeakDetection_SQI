@@ -21,16 +21,15 @@ file_path = '101'
 ecg_data = read_ecg_dat_file(file_path)
 
 
-
-
-
 HRVparams = {
     'PeakDetect': {
-        'REF_PERIOD': 0.6,
-        'THRES': 1.2,
-        'fid_vec': None,
-        'SIGN_FORCE': None,
+        'REF_PERIOD': 0.250,
+        'THRES': 0.6,
+        'fid_vec': [],
+        'SIGN_FORCE': [],
         'debug': True,
+        'windows': 15,
+        'ecgType': 'MECG'
     },
     'Fs': 1000,  # Replace with the actual sampling frequency
 }
